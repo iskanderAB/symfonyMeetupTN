@@ -1,0 +1,15 @@
+{
+  admin off
+}
+
+localhost:3001 {
+  mercure {
+    publisher_jwt isaknderSecret
+    subscriber_jwt isaknderSecret
+    anonymous
+    subscriptions
+    demo
+    compress off
+	debug
+  }
+}
