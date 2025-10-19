@@ -4,12 +4,16 @@
 
 localhost:3001 {
   mercure {
-    publisher_jwt isaknderSecret
-    subscriber_jwt isaknderSecret
+    publisher_jwt !ChangeThisMercureHubJWTSecretKey!
+    subscriber_jwt !ChangeThisMercureHubJWTSecretKey!
+    cors_origins *
+    publish_origins *
     anonymous
     subscriptions
     demo
     compress off
 	debug
+    ui
   }
+  respond "Mercure Hub is running :rocket:" 200
 }
