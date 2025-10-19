@@ -10,12 +10,16 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
 
     initialize() {
-         console.log("Hello iskander")
-        // Called once when the controller is first instantiated (per element)
+        const url = new URL('https://example.com/.well-known/mercure');
+        url.searchParams.append('topic', 'https://example.com/foo');
+        url.searchParams.append('topic', 'bar');
+        url.searchParams.append('topic', 'https://example.com/bar/{id}');
 
-        // Here you can initialize variables, create scoped callables for event
-        // listeners, instantiate external libraries, etc.
-        // this._fooBar = this.fooBar.bind(this)
+        const eventSource = new EventSource(url);
+
+        eventSource.onmessage =  ({data}: MessageEvent<any>): void =>  {
+            console.log(data);
+        };
     }
 
     connect() {

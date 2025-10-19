@@ -22,7 +22,7 @@ final class ProductController extends AbstractController
     #[Route('/add/product', name: 'app_add_product', methods: ['POST'])]
     public function addProduct(HubInterface $hub): JsonResponse
     {
-        for ($i = 0; $i < 5000; ++$i) {
+        for ($i = 0; $i < 10; ++$i) {
             $update = new Update(
                 'my-private-topic',
                 json_encode(['status' => 'OutOfStock'])

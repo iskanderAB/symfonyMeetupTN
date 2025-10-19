@@ -4,8 +4,8 @@
 
 localhost:3001 {
   mercure {
-    publisher_jwt !ChangeThisMercureHubJWTSecretKey!
-    subscriber_jwt !ChangeThisMercureHubJWTSecretKey!
+    publisher_jwt 85oXCY4s0RvvM2xuH/fKhauIS8W5TWNZsA0VvsijjdGe35UU0kIbq401VFUgDC/UkzyXEd3dG8fpHHJJjs14QR0J2uP4MrzzE9OKjwOXG4hSFFvAAxVn17NLpTEdO4jIRw/D+I9ZPVsUYzjXjY2l8iy11l+vbMBsDErVLHACG8B3oVxYgrki7QoxZm7wsyz/H7QUwvA3EyHmLA/BwCHIdLBp4BwRCDJ2ADbP/YGkfKjm70LxBYmMys2CJeHJE5wk8geZN9gIHehNOVVlnQknkBLlJbk3V2KxMDgwY+N83el4OQyv9KqBTXymLskdp9gO7Ufun+CpfpzmR9xXwX4pIq3c
+    subscriber_jwt 85oXCY4s0RvvM2xuH/fKhauIS8W5TWNZsA0VvsijjdGe35UU0kIbq401VFUgDC/UkzyXEd3dG8fpHHJJjs14QR0J2uP4MrzzE9OKjwOXG4hSFFvAAxVn17NLpTEdO4jIRw/D+I9ZPVsUYzjXjY2l8iy11l+vbMBsDErVLHACG8B3oVxYgrki7QoxZm7wsyz/H7QUwvA3EyHmLA/BwCHIdLBp4BwRCDJ2ADbP/YGkfKjm70LxBYmMys2CJeHJE5wk8geZN9gIHehNOVVlnQknkBLlJbk3V2KxMDgwY+N83el4OQyv9KqBTXymLskdp9gO7Ufun+CpfpzmR9xXwX4pIq3c
     cors_origins *
     publish_origins *
     anonymous
