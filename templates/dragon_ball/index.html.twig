@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Ball - Real-time Transformation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 3em;
+            text-shadow: 0 0 20px #FFD700;
+            color: #FFD700;
+        }
+
+        .updates-log {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .updates-log strong {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: #FFD700;
+        }
+
+        .update-item {
+            background: rgba(255, 107, 27, 0.3);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #FFD700;
+            border-radius: 5px;
+            font-size: 0.95em;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .character-card {
+            background: rgba(255, 107, 27, 0.1);
+            border: 2px solid #FF6B1B;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .character-card:hover {
+            box-shadow: 0 0 30px rgba(255, 107, 27, 0.5);
+        }
+
+        .character-name {
+            font-size: 2em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .character-form {
+            font-size: 1.5em;
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+
+        .power-level {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .power-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B1B, #FFD700);
+            transition: width 0.5s ease;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            border: 1px solid #FF6B1B;
+        }
+
+        .form-select option {
+            background: #16213e;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #FF6B1B, #FFD700);
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 107, 27, 0.7);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .battle-section {
+            background: rgba(73, 105, 225, 0.1);
+            border: 2px solid #4169E1;
+            border-radius: 10px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .battle-button {
+            background: linear-gradient(135deg, #4169E1, #1E90FF);
+            margin-top: 20px;
+        }
+
+        .battle-result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1.2em;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .animation {
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        }
+
+        .glowing {
+            animation: glow 0.6s ease;
+        }
+
+        /* Popup Modal Styles */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 4px solid #FFD700;
+            border-radius: 20px;
+            padding: 50px 60px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 0 100px rgba(255, 215, 0, 0.4);
+            animation: popupBounce 0.5s ease;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        @keyframes popupBounce {
+            0% {
+                transform: scale(0.3) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            70% {
+                transform: scale(0.9) rotate(-3deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .popup-trophy {
+            font-size: 8em;
+            margin-bottom: 20px;
+            animation: trophySpin 1s ease;
+            filter: drop-shadow(0 0 20px #FFD700);
+        }
+
+        @keyframes trophySpin {
+            0% { transform: rotateY(0deg) scale(0); }
+            50% { transform: rotateY(180deg) scale(1.2); }
+            100% { transform: rotateY(360deg) scale(1); }
+        }
+
+        .popup-title {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px #FFD700, 0 0 50px #FF6B1B;
+            animation: titlePulse 1.5s infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 30px #FFD700, 0 0 50px #FF6B1B;
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 40px #FFD700, 0 0 70px #FF6B1B, 0 0 90px #FF6B1B;
+            }
+        }
+
+        .popup-winner {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .popup-power {
+            font-size: 1.8em;
+            color: #FF6B1B;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .popup-close-btn {
+            background: linear-gradient(135deg, #FF6B1B, #FFD700);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-close-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 107, 27, 0.8);
+        }
+
+        .popup-fireworks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #FFD700;
+            border-radius: 50%;
+            animation: fireworkExplode 1s ease-out infinite;
+        }
+
+        @keyframes fireworkExplode {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        /* Goku Win Popup */
+        .goku-win-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: rgba(255, 107, 27, 0.95);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .goku-win-popup.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Vegeta Win Popup */
+        .vegeta-win-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background: rgba(65, 105, 225, 0.95);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            animation: slideInRight 0.5s ease;
+        }
+
+        .vegeta-win-popup.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Win Content Styling */
+        .win-content {
+            text-align: center;
+            padding: 50px;
+            position: relative;
+        }
+
+        .win-emoji {
+            font-size: 10em;
+            margin-bottom: 20px;
+            animation: bounceEmoji 0.8s ease infinite;
+        }
+
+        @keyframes bounceEmoji {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-30px) scale(1.2);
+            }
+        }
+
+        .win-text {
+            font-size: 5em;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 40px #000, 0 0 60px #FFD700;
+            margin-bottom: 20px;
+            animation: textPulse 1s infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 40px #000, 0 0 60px #FFD700;
+            }
+            50% {
+                transform: scale(1.1);
+                text-shadow: 0 0 50px #000, 0 0 80px #FFD700, 0 0 100px #FFD700;
+            }
+        }
+
+        .character-name-big {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 30px #000;
+            margin-bottom: 30px;
+        }
+
+        .power-display {
+            font-size: 2em;
+            color: #fff;
+            margin-bottom: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .close-win-btn {
+            background: linear-gradient(135deg, #000, #333);
+            color: #FFD700;
+            border: 3px solid #FFD700;
+            padding: 20px 50px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-win-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px #FFD700;
+        }
+
+        /* Fail Content Styling */
+        .fail-content {
+            text-align: center;
+            padding: 50px;
+            position: relative;
+            opacity: 0.7;
+        }
+
+        .fail-emoji {
+            font-size: 10em;
+            margin-bottom: 20px;
+            filter: grayscale(100%);
+        }
+
+        .fail-text {
+            font-size: 5em;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 0 0 40px #000;
+            margin-bottom: 20px;
+        }
+
+        /* Sparkles Effect */
+        .sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #FFD700;
+            border-radius: 50%;
+            animation: sparkleFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkleFloat {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚡ DRAGON BALL Z ⚡</h1>
+
+    <!-- Updates Log - Moved to Top -->
+    <div class="updates-log" id="updates-log">
+        <strong>📡 REAL-TIME UPDATES:</strong>
+        <div class="update-item">Waiting for updates...</div>
+    </div>
+
+    <div class="main-content">
+        <!-- Character 1 -->
+        <div class="character-card" id="character1-card">
+            <div class="character-name" id="char1-name">Goku</div>
+            <div class="character-form" id="char1-form">Base Form</div>
+            <div class="power-level">
+                Power: <span id="char1-power">3000</span>
+                <div class="power-bar">
+                    <div class="power-fill" id="char1-bar" style="width: 10%"></div>
+                </div>
+            </div>
+            <select class="form-select" id="form1-select">
+                <option value="Base">Base Form</option>
+                <option value="Super Saiyan">Super Saiyan</option>
+                <option value="Super Saiyan 2">Super Saiyan 2</option>
+                <option value="Super Saiyan 3">Super Saiyan 3</option>
+                <option value="Ultra Instinct">Ultra Instinct</option>
+            </select>
+            <button id="transform1-btn">⚡ TRANSFORM ⚡</button>
+        </div>
+
+        <!-- Character 2 -->
+        <div class="character-card" id="character2-card">
+            <div class="character-name" id="char2-name">Vegeta</div>
+            <div class="character-form" id="char2-form">Base Form</div>
+            <div class="power-level">
+                Power: <span id="char2-power">2500</span>
+                <div class="power-bar">
+                    <div class="power-fill" id="char2-bar" style="width: 8%"></div>
+                </div>
+            </div>
+            <select class="form-select" id="form2-select">
+                <option value="Base">Base Form</option>
+                <option value="Super Saiyan">Super Saiyan</option>
+                <option value="Blue Evolution">Blue Evolution</option>
+            </select>
+            <button id="transform2-btn">⚡ TRANSFORM ⚡</button>
+        </div>
+    </div>
+
+    <!-- Battle Section -->
+    <div class="battle-section">
+        <h2>⚔️ BATTLE ⚔️</h2>
+        <button class="battle-button" id="battle-btn">START BATTLE</button>
+        <div class="battle-result" id="battle-result">Select characters and click START BATTLE</div>
+    </div>
+</div>
+
+<!-- Goku Win/Fail Popup -->
+<div class="goku-win-popup" id="goku-popup">
+    <div class="win-content" id="goku-content">
+        <div class="sparkles" id="goku-sparkles"></div>
+        <div class="win-emoji" id="goku-emoji">🎉</div>
+        <div class="win-text" id="goku-result-text">YOU WIN!</div>
+        <div class="character-name-big">GOKU</div>
+        <div class="power-display" id="goku-power-display">Power: 150,000</div>
+        <button class="close-win-btn" id="close-goku-popup">CONTINUE</button>
+    </div>
+</div>
+
+<!-- Vegeta Win/Fail Popup -->
+<div class="vegeta-win-popup" id="vegeta-popup">
+    <div class="win-content" id="vegeta-content">
+        <div class="sparkles" id="vegeta-sparkles"></div>
+        <div class="win-emoji" id="vegeta-emoji">🎉</div>
+        <div class="win-text" id="vegeta-result-text">YOU WIN!</div>
+        <div class="character-name-big">VEGETA</div>
+        <div class="power-display" id="vegeta-power-display">Power: 150,000</div>
+        <button class="close-win-btn" id="close-vegeta-popup">CONTINUE</button>
+    </div>
+</div>
+
+<script>
+    let character1 = { name: 'Goku', form: 'Base', power: 3000 };
+    let character2 = { name: 'Vegeta', form: 'Base', power: 2500 };
+
+    const params = new URLSearchParams();
+    params.append('topic', 'dragon-ball-transform');
+    params.append('topic', 'dragon-ball-battle');
+    const eventSource = new EventSource('https:localhost:3001/.well-known/mercure?' + params.toString());
+
+    eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received:', data);
+
+        if (data.character && data.form) {
+            updateCharacterDisplay(data.character, data.form, data.power, data.color);
+            addUpdateLog(`${data.character} transformed to ${data.form}! Power: ${data.power}`);
+        }
+
+        if (data.winner) {
+            const resultText = `🏆 ${data.winner} WINS! 🏆 (Power: ${data.winnerPower})`;
+            document.getElementById('battle-result').textContent = resultText;
+            document.getElementById('battle-result').classList.add('glowing');
+            setTimeout(() => {
+                document.getElementById('battle-result').classList.remove('glowing');
+            }, 600);
+            addUpdateLog(resultText);
+
+            // Show character-specific popups
+            showCharacterResults(data.winner, data.winnerPower);
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.error('EventSource error:', error);
+    };
+
+    document.getElementById('transform1-btn').addEventListener('click', () => {
+        const newForm = document.getElementById('form1-select').value;
+        character1.form = newForm;
+        sendTransform('Goku', newForm);
+    });
+
+    document.getElementById('transform2-btn').addEventListener('click', () => {
+        const newForm = document.getElementById('form2-select').value;
+        character2.form = newForm;
+        sendTransform('Vegeta', newForm);
+    });
+
+    document.getElementById('battle-btn').addEventListener('click', () => {
+        sendBattle(character1.name, character1.power, character2.name, character2.power);
+    });
+
+    function sendTransform(character, form) {
+        fetch('/api/transform', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ character, newForm: form })
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
+    }
+
+    function sendBattle(char1, power1, char2, power2) {
+        fetch('/api/battle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ character1: char1, power1, character2: char2, power2 })
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
+    }
+
+    function updateCharacterDisplay(character, form, power, color) {
+        const isChar1 = character === 'Goku';
+        const cardId = isChar1 ? 'character1-card' : 'character2-card';
+        const formId = isChar1 ? 'char1-form' : 'char2-form';
+        const powerId = isChar1 ? 'char1-power' : 'char2-power';
+        const barId = isChar1 ? 'char1-bar' : 'char2-bar';
+
+        document.getElementById(cardId).classList.add('animation');
+        document.getElementById(formId).textContent = form;
+        document.getElementById(powerId).textContent = power.toLocaleString();
+
+        const maxPower = 999999;
+        const percentage = (power / maxPower) * 100;
+        document.getElementById(barId).style.width = Math.min(percentage, 100) + '%';
+
+        if (isChar1) {
+            character1.power = power;
+        } else {
+            character2.power = power;
+        }
+
+        setTimeout(() => {
+            document.getElementById(cardId).classList.remove('animation');
+        }, 600);
+    }
+
+    function showCharacterResults(winner, winnerPower) {
+        // Determine who won and who lost
+        const gokuWon = winner === 'Goku';
+        const vegetaWon = winner === 'Vegeta';
+
+        // Show Goku's result
+        if (gokuWon) {
+            showWinPopup('goku', character1.power);
+        } else {
+            showFailPopup('goku', character1.power);
+        }
+
+        // Show Vegeta's result
+        if (vegetaWon) {
+            showWinPopup('vegeta', character2.power);
+        } else {
+            showFailPopup('vegeta', character2.power);
+        }
+    }
+
+    function showWinPopup(character, power) {
+        const popup = document.getElementById(`${character}-popup`);
+        const emoji = document.getElementById(`${character}-emoji`);
+        const resultText = document.getElementById(`${character}-result-text`);
+        const powerDisplay = document.getElementById(`${character}-power-display`);
+        const content = document.getElementById(`${character}-content`);
+
+        emoji.textContent = '🏆';
+        resultText.textContent = 'YOU WIN!';
+        resultText.style.color = '#FFD700';
+        powerDisplay.textContent = `Power: ${power.toLocaleString()}`;
+        content.className = 'win-content';
+
+        popup.classList.add('show');
+        createSparkles(character);
+    }
+
+    function showFailPopup(character, power) {
+        const popup = document.getElementById(`${character}-popup`);
+        const emoji = document.getElementById(`${character}-emoji`);
+        const resultText = document.getElementById(`${character}-result-text`);
+        const powerDisplay = document.getElementById(`${character}-power-display`);
+        const content = document.getElementById(`${character}-content`);
+
+        emoji.textContent = '😢';
+        resultText.textContent = 'YOU FAIL!';
+        resultText.style.color = '#ff0000';
+        powerDisplay.textContent = `Power: ${power.toLocaleString()}`;
+        content.className = 'fail-content';
+
+        popup.classList.add('show');
+    }
+
+    function createSparkles(character) {
+        const container = document.getElementById(`${character}-sparkles`);
+        container.innerHTML = '';
+
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+
+                const startX = Math.random() * 100;
+                sparkle.style.left = startX + '%';
+                sparkle.style.animationDelay = (Math.random() * 2) + 's';
+
+                container.appendChild(sparkle);
+
+                setTimeout(() => sparkle.remove(), 2000);
+            }, i * 100);
+        }
+    }
+
+    document.getElementById('close-goku-popup').addEventListener('click', () => {
+        document.getElementById('goku-popup').classList.remove('show');
+    });
+
+    document.getElementById('close-vegeta-popup').addEventListener('click', () => {
+        document.getElementById('vegeta-popup').classList.remove('show');
+    });
+
+    function addUpdateLog(message) {
+        const log = document.getElementById('updates-log');
+        const item = document.createElement('div');
+        item.className = 'update-item';
+        item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        log.appendChild(item);
+        log.scrollTop = log.scrollHeight;
+    }
+</script>
+</body>
+</html>

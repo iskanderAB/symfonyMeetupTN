@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Receiver - Live Messages{% endblock %}
+
+{% block body %}
+<div style="max-width: 600px; margin: 50px auto; padding: 20px; font-family: Arial, sans-serif;">
+    <h1 style="color: #4CAF50; border-bottom: 3px solid #4CAF50; padding-bottom: 10px;">
+        📥 Message Receiver (Live)
+    </h1>
+
+    <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 0; color: #2e7d32;">
+            <strong>Real-time Listening:</strong> This page is connected to the Mercure hub.
+            Any message sent from the Sender page will appear here instantly!
+        </p>
+    </div>
+
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <div id="statusIndicator" style="width: 12px; height: 12px; border-radius: 50%;
+                 background: #ff9800; margin-right: 10px;"></div>
+            <span id="connectionStatus" style="color: #666; font-weight: bold;">Connecting to Mercure...</span>
+        </div>
+
+        <h3 style="color: #333; margin-top: 0;">Received Messages:</h3>
+        <div id="messages" style="max-height: 400px; overflow-y: auto;">
+            <div style="color: #999; font-style: italic; text-align: center; padding: 20px;">
+                Waiting for messages...
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px; background: #fff3e0; padding: 15px; border-radius: 5px; border-left: 4px solid #FF9800;">
+        <strong>💡 How it works:</strong>
+        <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+            <li>This page subscribes to the topic: <code style="background: #ffe0b2; padding: 2px 6px; border-radius: 3px;">chat-messages</code></li>
+            <li>The Mercure hub pushes updates in real-time using Server-Sent Events (SSE)</li>
+            <li>No polling, no refresh needed - it's instant!</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{{ path('mercure_demo_index') }}"
+           style="color: #2196F3; text-decoration: none;">← Back to Explanation</a>
+        <span style="margin: 0 10px; color: #ddd;">|</span>
+        <a href="{{ path('mercure_demo_sender') }}"
+           style="color: #2196F3; text-decoration: none;">Go to Sender →</a>
+    </div>
+</div>
+
+<script>
+    let messageCount = 0;
+    const messagesContainer = document.getElementById('messages');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const connectionStatus = document.getElementById('connectionStatus');
+
+    // Subscribe to Mercure hub for the 'chat-messages' topic
+    const url = new URL('https://localhost:3001/.well-known/mercure');
+    url.searchParams.append('topic', 'chat-messages');
+
+    const eventSource = new EventSource(url);
+
+    eventSource.onopen = function() {
+        statusIndicator.style.background = '#4CAF50';
+        connectionStatus.textContent = 'Connected ✅';
+        connectionStatus.style.color = '#4CAF50';
+        console.log('Connected to Mercure hub');
+    };
+
+    eventSource.onmessage = function(event) {
+        console.log('Mercure message received:', event.data);
+
+        const data = JSON.parse(event.data);
+        displayMessage(data);
+    };
+
+    // On error
+    eventSource.onerror = function(error) {
+        statusIndicator.style.background = '#f44336';
+        connectionStatus.textContent = 'Connection Error ❌';
+        connectionStatus.style.color = '#f44336';
+        console.error('EventSource error:', error);
+    };
+
+    function displayMessage(data) {
+        messageCount++;
+
+        // Clear "waiting" message on first message
+        if (messageCount === 1) {
+            messagesContainer.innerHTML = '';
+        }
+
+        const messageDiv = document.createElement('div');
+        messageDiv.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        `;
+
+        messageDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="font-size: 16px;">👤 ${data.username}</strong>
+                <span style="font-size: 12px; opacity: 0.9;">🕐 ${data.timestamp}</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 5px; font-size: 15px;">
+                ${data.message}
+            </div>
+        `;
+
+        messagesContainer.insertBefore(messageDiv, messagesContainer.firstChild);
+
+        // Play a subtle notification sound (optional - visual feedback instead)
+        messageDiv.style.animation = 'slideIn 0.3s ease-out, pulse 0.5s ease-out';
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+        eventSource.close();
+    });
+</script>
+{% endblock %}
+

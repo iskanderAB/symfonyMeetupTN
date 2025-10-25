@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mercure Demo - Explanation{% endblock %}
+
+{% block body %}
+<div style="max-width: 800px; margin: 50px auto; padding: 20px; font-family: Arial, sans-serif;">
+    <h1 style="color: #333; border-bottom: 3px solid #4CAF50; padding-bottom: 10px;">
+        🚀 Mercure Protocol - Simple Explanation
+    </h1>
+
+    <div style="background: #f0f8ff; padding: 20px; border-left: 5px solid #2196F3; margin: 20px 0;">
+        <h2 style="color: #2196F3; margin-top: 0;">What is Mercure?</h2>
+        <p style="font-size: 16px; line-height: 1.6;">
+            Mercure is a protocol for <strong>real-time communication</strong>. It allows you to push updates from your server
+            to clients (browsers) instantly without the client having to refresh the page or constantly ask "is there new data?".
+        </p>
+    </div>
+
+    <div style="background: #fff3e0; padding: 20px; border-left: 5px solid #FF9800; margin: 20px 0;">
+        <h2 style="color: #FF9800; margin-top: 0;">How Does It Work?</h2>
+        <ol style="font-size: 16px; line-height: 1.8;">
+            <li><strong>Publisher:</strong> Your server sends data to the Mercure hub</li>
+            <li><strong>Hub:</strong> The Mercure hub receives and broadcasts the data</li>
+            <li><strong>Subscribers:</strong> Browsers listening to specific topics receive updates instantly</li>
+        </ol>
+    </div>
+
+    <div style="background: #e8f5e9; padding: 20px; border-left: 5px solid #4CAF50; margin: 20px 0;">
+        <h2 style="color: #4CAF50; margin-top: 0;">Simple Example: Chat Messages</h2>
+        <p style="font-size: 16px; line-height: 1.6;">
+            Open these two pages in <strong>different browser tabs</strong>:
+        </p>
+        <div style="display: flex; gap: 20px; margin-top: 20px;">
+            <a href="{{ path('mercure_demo_sender') }}"
+               style="flex: 1; background: #2196F3; color: white; padding: 20px; text-align: center;
+                      text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">
+                📤 SENDER<br>
+                <small style="font-weight: normal; font-size: 14px;">Send messages from here</small>
+            </a>
+            <a href="{{ path('mercure_demo_receiver') }}"
+               style="flex: 1; background: #4CAF50; color: white; padding: 20px; text-align: center;
+                      text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px;">
+                📥 RECEIVER<br>
+                <small style="font-weight: normal; font-size: 14px;">Receive messages in real-time</small>
+            </a>
+        </div>
+    </div>
+
+    <div style="background: #fce4ec; padding: 20px; border-left: 5px solid #E91E63; margin: 20px 0;">
+        <h2 style="color: #E91E63; margin-top: 0;">The Code Explanation</h2>
+        <pre style="background: #263238; color: #aed581; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 14px;">
+// 1. PUBLISH (Server-side - PHP)
+$update = new Update(
+    'chat-messages',    // Topic name (channel)
+    json_encode([       // Data to send
+        'message' => 'Hello!'
+    ])
+);
+$hub->publish($update); // Send to Mercure hub
+
+// 2. SUBSCRIBE (Client-side - JavaScript)
+const eventSource = new EventSource(
+    'http://localhost:3000/.well-known/mercure?topic=chat-messages'
+);
+eventSource.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Received:', data.message);
+};
+        </pre>
+    </div>
+
+    <div style="background: #fff; padding: 15px; border: 2px solid #ddd; border-radius: 5px; margin-top: 30px;">
+        <p style="margin: 0; color: #666;">
+            💡 <strong>Tip:</strong> Open the Sender and Receiver in separate tabs.
+            Type a message in the Sender and watch it appear instantly in the Receiver!
+        </p>
+    </div>
+</div>
+{% endblock %}
+

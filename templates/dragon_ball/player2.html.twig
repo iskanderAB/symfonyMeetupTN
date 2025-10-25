@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player 2 - Vegeta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4169E1 0%, #1E90FF 100%);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .player-badge {
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .player-badge h1 {
+            font-size: 3em;
+            color: #FFD700;
+            text-shadow: 0 0 20px #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .player-badge p {
+            font-size: 1.5em;
+            color: #fff;
+        }
+
+        .character-card {
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .character-name {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 30px #FFD700;
+        }
+
+        .character-form {
+            font-size: 2em;
+            color: #fff;
+            margin-bottom: 20px;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .power-level {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+
+        .power-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1E90FF, #87CEEB);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 20px #1E90FF;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .form-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        button {
+            background: linear-gradient(135deg, #FFD700, #FFF);
+            color: #000;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #FFD700;
+        }
+
+        .battle-btn {
+            background: linear-gradient(135deg, #ff0000, #ff6b6b);
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        .battle-btn:hover {
+            box-shadow: 0 0 30px #ff0000;
+        }
+
+        .animation {
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Win Popup */
+        .win-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 0, 0.95);
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+
+        .win-popup.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .win-content {
+            text-align: center;
+        }
+
+        .win-emoji {
+            font-size: 12em;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-50px) scale(1.2); }
+        }
+
+        .win-text {
+            font-size: 6em;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 0 50px #000;
+            margin: 30px 0;
+        }
+
+        .close-btn {
+            background: #000;
+            color: #FFD700;
+            border: 3px solid #FFD700;
+            padding: 20px 50px;
+            font-size: 1.5em;
+        }
+
+        /* Fail Popup */
+        .fail-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.95);
+            z-index: 1000;
+            animation: slideIn 0.5s ease;
+        }
+
+        .fail-popup.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fail-content {
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .fail-emoji {
+            font-size: 12em;
+            filter: grayscale(100%);
+        }
+
+        .fail-text {
+            font-size: 6em;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 0 50px #fff;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="player-badge">
+        <h1>🎮 PLAYER 2 🎮</h1>
+        <p>{{ character }}</p>
+    </div>
+
+    <div class="character-card" id="character-card">
+        <div class="character-name">{{ character }}</div>
+        <div class="character-form" id="char-form">Base Form</div>
+        <div class="power-level">
+            Power: <span id="char-power">2500</span>
+            <div class="power-bar">
+                <div class="power-fill" id="char-bar" style="width: 8%"></div>
+            </div>
+        </div>
+        <select class="form-select" id="form-select">
+            <option value="Base">Base Form</option>
+            <option value="Super Saiyan">Super Saiyan</option>
+            <option value="Blue Evolution">Blue Evolution</option>
+        </select>
+        <button id="transform-btn">⚡ TRANSFORM ⚡</button>
+        <button class="battle-btn" id="battle-btn">⚔️ READY FOR BATTLE ⚔️</button>
+    </div>
+</div>
+
+<!-- Win Popup -->
+<div class="win-popup" id="win-popup">
+    <div class="win-content">
+        <div class="win-emoji">🏆</div>
+        <div class="win-text">YOU WIN!</div>
+        <div style="font-size: 2.5em; margin-bottom: 30px;">Power: <span id="win-power">0</span></div>
+        <button class="close-btn" id="close-win">CONTINUE</button>
+    </div>
+</div>
+
+<!-- Fail Popup -->
+<div class="fail-popup" id="fail-popup">
+    <div class="fail-content">
+        <div class="fail-emoji">😢</div>
+        <div class="fail-text">YOU FAIL!</div>
+        <div style="font-size: 2.5em; margin-bottom: 30px;">Power: <span id="fail-power">0</span></div>
+        <button class="close-btn" id="close-fail">TRY AGAIN</button>
+    </div>
+</div>
+
+<script>
+    // Clear only this player's localStorage on page refresh
+    localStorage.removeItem('player2_power');
+    localStorage.removeItem('player2_form');
+
+    let character = { name: '{{ character }}', form: 'Base', power: 2500 };
+
+    const params = new URLSearchParams();
+    params.append('topic', 'dragon-ball-transform');
+    params.append('topic', 'dragon-ball-battle');
+    const eventSource = new EventSource('https:localhost:3001/.well-known/mercure?' + params.toString());
+
+    eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('Received:', data);
+
+        if (data.character && data.form) {
+            // Update display for this character's transformations
+            if (data.character === '{{ character }}') {
+                updateCharacterDisplay(data.form, data.power);
+            }
+            // Save other player's transformation to localStorage
+            else if (data.character === 'Goku') {
+                localStorage.setItem('player1_power', data.power);
+                localStorage.setItem('player1_form', data.form);
+                console.log('Saved Player 1 power:', data.power);
+            }
+        }
+
+        if (data.winner) {
+            checkBattleResult(data.winner, data.winnerPower);
+        }
+    };
+
+    // Load saved power from localStorage on page load
+    const savedPower = localStorage.getItem('player2_power');
+    const savedForm = localStorage.getItem('player2_form');
+    if (savedPower) {
+        character.power = parseInt(savedPower);
+        document.getElementById('char-power').textContent = character.power.toLocaleString();
+        const maxPower = 999999;
+        const percentage = (character.power / maxPower) * 100;
+        document.getElementById('char-bar').style.width = Math.min(percentage, 100) + '%';
+    }
+    if (savedForm) {
+        character.form = savedForm;
+        document.getElementById('char-form').textContent = savedForm;
+        document.getElementById('form-select').value = savedForm;
+    }
+
+    document.getElementById('transform-btn').addEventListener('click', () => {
+        const newForm = document.getElementById('form-select').value;
+        character.form = newForm;
+        sendTransform('{{ character }}', newForm);
+    });
+
+    document.getElementById('battle-btn').addEventListener('click', () => {
+        sendBattle();
+    });
+
+    function sendTransform(characterName, form) {
+        fetch('/api/transform', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ character: characterName, newForm: form })
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
+    }
+
+    function sendBattle() {
+        // Get opponent's power from localStorage
+        const opponentPower = parseInt(localStorage.getItem('player1_power')) || 3000;
+
+        fetch('/api/battle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                character1: 'Goku',
+                power1: opponentPower,
+                character2: '{{ character }}',
+                power2: character.power
+            })
+        })
+            .then(res => res.json())
+            .then(data => console.log(data))
+            .catch(err => console.error(err));
+    }
+
+    function updateCharacterDisplay(form, power) {
+        document.getElementById('character-card').classList.add('animation');
+        document.getElementById('char-form').textContent = form;
+        document.getElementById('char-power').textContent = power.toLocaleString();
+
+        const maxPower = 999999;
+        const percentage = (power / maxPower) * 100;
+        document.getElementById('char-bar').style.width = Math.min(percentage, 100) + '%';
+
+        character.power = power;
+        character.form = form;
+
+        // Save to localStorage
+        localStorage.setItem('player2_power', power);
+        localStorage.setItem('player2_form', form);
+
+        setTimeout(() => {
+            document.getElementById('character-card').classList.remove('animation');
+        }, 600);
+    }
+
+    function checkBattleResult(winner, winnerPower) {
+        if (winner === '{{ character }}') {
+            showWin(character.power);
+        } else {
+            showFail(character.power);
+        }
+    }
+
+    function showWin(power) {
+        document.getElementById('win-power').textContent = power.toLocaleString();
+        document.getElementById('win-popup').classList.add('show');
+    }
+
+    function showFail(power) {
+        document.getElementById('fail-power').textContent = power.toLocaleString();
+        document.getElementById('fail-popup').classList.add('show');
+    }
+
+    document.getElementById('close-win').addEventListener('click', () => {
+        document.getElementById('win-popup').classList.remove('show');
+    });
+
+    document.getElementById('close-fail').addEventListener('click', () => {
+        document.getElementById('fail-popup').classList.remove('show');
+    });
+</script>
+</body>
+</html>
